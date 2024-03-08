@@ -1,12 +1,18 @@
 import { useState } from "react";
 import TaskItem from "./components/TaskItem";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import { Routes, Route, Link } from "react-router-dom";
+import routes from "./routes";
 import "./App.css";
 
 const App = () => {
   const [task, setTask] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("To Do");
+  const [taskIndexToUpdate, setTaskIndexToUpdate] = useState();
   const [tasks, setTasks] = useState([]);
+  const [toUpdate, setToUpdate] = useState(false);
 
   function changeTask(e) {
     setTask(e.target.value);
@@ -31,6 +37,9 @@ const App = () => {
     let newTasks = [...tasks];
     newTasks.push(newTask);
     setTasks(newTasks);
+    setTask("");
+    setDescription("");
+    setStatus("To Do");
   }
 
   function completeTask(i) {
@@ -53,9 +62,68 @@ const App = () => {
     setTasks(updatedTasks);
   }
 
+  function deleteTask(i) {
+    const updatedTasks = tasks.filter((task, index) => {
+      return index !== i;
+    });
+    console.log(updatedTasks);
+    setTasks(updatedTasks);
+  }
+
+  function setUpdate(taskToUpdate, descriptionToUpdate, statusToUpdate, index) {
+    if (index !== taskIndexToUpdate) {
+      setToUpdate(true);
+      setTask(taskToUpdate);
+      setDescription(descriptionToUpdate);
+      setStatus(statusToUpdate);
+      setTaskIndexToUpdate(index);
+    } else {
+      setTaskIndex();
+      setToUpdate(false);
+      setTask("");
+      setDescription("");
+      setStatus("To Do");
+    }
+  }
+
+  function updateTask(e) {
+    e.preventDefault();
+    const updatedTasks = tasks.map((taskItem, index) => {
+      if (index === taskIndexToUpdate) {
+        taskItem.task = task;
+        taskItem.description = description;
+        taskItem.status = status;
+      }
+      return taskItem;
+    });
+    setTasks(updatedTasks);
+    setToUpdate(false);
+  }
+
   return (
     <div id="todo-app">
-      <form onSubmit={createTask}>
+      <nav className="links">
+        {routes.map((route, index) => {
+          return (
+            <Link key={index} to={route.path}>
+              {route.name}
+            </Link>
+          );
+        })}
+      </nav>
+      <Routes>
+        {routes.map((route, index) => {
+          return (
+            <Route
+              key={index}
+              path={route.path}
+              element={route.element}
+              exact
+            />
+          );
+        })}
+      </Routes>
+      <form onSubmit={toUpdate ? updateTask : createTask}>
         <input
           type="text"
           value={task}
@@ -69,10 +137,15 @@ const App = () => {
           placeholder="Description"
         />
         <div className="status">
-          <input type="checkbox" onChange={changeStatus} id="status" />
+          <input
+            type="checkbox"
+            onChange={changeStatus}
+            id="status"
+            checked={status === "On Going"}
+          />
           <label htmlFor="status">On Going</label>
         </div>
-        <input type="submit" value="Create Task" />
+        <input type="submit" value={toUpdate ? "Update Task" : "Create Task"} />
       </form>
       {tasks.map((task, index) => {
         return (
@@ -82,16 +155,13 @@ const App = () => {
             taskStatus={task.status}
             setComplete={completeTask}
             setOnGoing={doTask}
+            onDelete={deleteTask}
+            onUpdate={setUpdate}
             position={index}
             key={index}
           />
         );
       })}
-      {/* <TaskItem
-        taskTitle="This is a custom task title"
-        taskDescription="Sample task description"
-        taskStatus="Completed"
-      /> */}
     </div>
   );
 };

@@ -1,31 +1,67 @@
 import "./TaskItem.css";
 
-const TaskItem = (props) => {
+const TaskItem = ({
+  taskTitle,
+  taskDescription,
+  taskStatus,
+  setComplete,
+  setOnGoing,
+  onDelete,
+  onUpdate,
+  position,
+}) => {
   const taskClass = `task-item ${
-    props.taskStatus === "On Going"
+    taskStatus === "On Going"
       ? "ongoing"
-      : props.taskStatus === "Completed"
+      : taskStatus === "Completed"
       ? "completed"
       : ""
   }`;
   return (
     <div className={taskClass}>
       <div>
-        <h3>{props.taskTitle}</h3>
-        <p>{props.taskDescription}</p>
+        <h3>{taskTitle}</h3>
+        <p>{taskDescription}</p>
       </div>
       <div className="actions">
-        <button
-          className="btn-success"
-          onClick={() => props.setComplete(props.position)}
-        >
-          Completed
-        </button>
-        <button
-          className="btn-warning"
-          onClick={() => props.setOnGoing(props.position)}
-        >
-          On Going
+        {taskStatus !== "Completed" ? (
+          <>
+            <button
+              className="btn-success"
+              onClick={() => setComplete(position)}
+            >
+              <box-icon name="check" color="white" size="xs"></box-icon>
+            </button>
+            {taskStatus !== "On Going" ? (
+              <button
+                className="btn-warning"
+                onClick={() => setOnGoing(position)}
+              >
+                <box-icon
+                  name="alarm-exclamation"
+                  type="solid"
+                  color="#ffffff"
+                  size="xs"
+                ></box-icon>
+              </button>
+            ) : null}
+            <button
+              className="btn-info"
+              onClick={() =>
+                onUpdate(taskTitle, taskDescription, taskStatus, position)
+              }
+            >
+              <box-icon
+                name="edit-alt"
+                type="solid"
+                color="#ffffff"
+                size="xs"
+              ></box-icon>
+            </button>
+          </>
+        ) : null}
+        <button className="btn-danger" onClick={() => onDelete(position)}>
+          <box-icon name="x" color="white" size="xs"></box-icon>
         </button>
       </div>
     </div>
